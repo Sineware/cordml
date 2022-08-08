@@ -21,6 +21,7 @@
     "marked": "^4.0.18",
     "pg": "^8.7.3",
     "utf-8-validate": "^5.0.9",
+    "xss": "^1.0.13",
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {

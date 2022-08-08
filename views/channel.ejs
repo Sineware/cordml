@@ -18,7 +18,7 @@
         <div>
             <a style="float: right;" href="/<%= channel.id %>/<%= msg.id %>"><i class="fa fa-chain"
                                                                                     aria-hidden="true"></i></a>
-            <div><%- marked.parse(msg.content) %></div>
+            <div><%- xss(marked.parse(msg.content)) %></div>
             <% if(msg.attachments.first() !== undefined) { %>
                 <div style="text-align: center;"><img src="<%= msg.attachments.first().url %>" alt="<%= msg.attachments.first().filename %>"
                                                       style="max-width: 95%;"></div>

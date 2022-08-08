@@ -2,6 +2,8 @@ const {Client, GatewayIntentBits, InteractionType} = require('discord.js')
 const express = require("express")
 const { marked } = require('marked')
 const pg = require('pg')
+const xss = require("xss");
+
 require('dotenv').config()
 
 console.log("Starting CordML Server...")
@@ -41,7 +43,7 @@ client.on('ready', async () => {
             for (let channel of channels) {
                 c.push(await client.channels.fetch(channel))
             }
-            res.render('index', { c })
+            res.render('index', { c, xss })
         } catch(e) {
             console.log(e)
             res.send(e.message)
@@ -58,7 +60,7 @@ client.on('ready', async () => {
             }
             const channel = await client.channels.resolve(req.params.channel)
             const msgs = (await channel.messages.fetch()).toJSON()
-            res.render('channel', { channel, msgs, marked })
+            res.render('channel', { channel, msgs, marked, xss })
         } catch(e) {
             res.send(e.message)
         }
@@ -75,8 +77,8 @@ client.on('ready', async () => {
             const channel = await client.channels.resolve(req.params.channel)
             const msg = await channel.messages.fetch(req.params.msg)
             //console.log(msg)
-            let html = marked.parse(msg.content)
-            res.render('page', { channel, msg, html, marked })
+            let html = xss(marked.parse(msg.content))
+            res.render('page', { channel, msg, html, marked, xss })
         } catch(e) {
             res.send(e.message)
         }

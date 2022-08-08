@@ -11,7 +11,7 @@
 <body>
 <div class="container">
     <a href="/<%= channel.id %>"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</a>
-    <h1><%- marked.parse(msg.content.split("\n")[0]) %></h1>
+    <h1><%- xss(marked.parse(msg.content.split("\n")[0])) %></h1>
     <p>(#<%= channel.name %> from "<%= channel.guild.name %>")</p>
     <hr/>
     <% if(msg.attachments.first() !== undefined) { %>
