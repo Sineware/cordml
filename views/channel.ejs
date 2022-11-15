@@ -15,14 +15,19 @@
     <p> (#<%= channel.name %> from "<%= channel.guild.name %>")</p>
     <hr/>
     <% for (let msg of msgs) { %>
-        <div>
+        <div style="border-style: solid; margin: 10px; padding: 10px">
             <a style="float: right;" href="/<%= channel.id %>/<%= msg.id %>"><i class="fa fa-chain"
                                                                                     aria-hidden="true"></i></a>
-            <div><%- xss(marked.parse(msg.content)) %></div>
+            <div><%- xss(marked.parse(msg.content ?? "")) %></div>
             <% if(msg.attachments.first() !== undefined) { %>
                 <div style="text-align: center;"><img src="<%= msg.attachments.first().url %>" alt="<%= msg.attachments.first().filename %>"
                                                       style="max-width: 95%;"></div>
             <% } %>
+            <% if(msg.embeds[0]?.description !== undefined) { %>
+                <h5><%- xss(marked.parse(msg.embeds[0].title ?? "")) %></h5>
+                <code><%- xss(marked.parse(msg.embeds[0].description ?? "")) %></code>
+            <% } %>
+            <b><%- xss(msg.author.username ?? "") %> (<%- new Date(msg.createdTimestamp).toLocaleString(); %>)</b>
         </div>
     <% } %>
 </div>

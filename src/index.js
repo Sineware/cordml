@@ -1,4 +1,4 @@
-const {Client, GatewayIntentBits, InteractionType} = require('discord.js')
+const {Client, GatewayIntentBits, InteractionType, MessageFlags} = require('discord.js')
 const express = require("express")
 const { marked } = require('marked')
 const pg = require('pg')
@@ -9,6 +9,8 @@ require('dotenv').config()
 console.log("Starting CordML Server...")
 
 let db;
+let channelPageCache = new Map();
+let channelPageCacheLoading = new Map();
 
 const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
@@ -58,8 +60,32 @@ client.on('ready', async () => {
                 res.send("This channel is not supported.")
                 return
             }
-            const channel = await client.channels.resolve(req.params.channel)
-            const msgs = (await channel.messages.fetch()).toJSON()
+            let channel = await client.channels.fetch(req.params.channel)
+            if(!channelPageCache.has(req.params.channel)) {
+                if (channelPageCacheLoading.get(req.params.channel) == "loading") {
+                    res.send("CordML is still updating this page, please wait a few seconds and refresh.");
+                    return;
+                }
+                res.send("CordML is updating this page, please wait a few seconds and refresh.");
+                channelPageCacheLoading.set(req.params.channel, "loading")
+                let messages = await fetchAllMessages(channel)
+                channelPageCache.set(req.params.channel, messages)
+                channelPageCacheLoading.set(req.params.channel, "done")
+                return;
+            } else {
+                // Update the cache in the background 
+                if(channelPageCacheLoading.get(req.params.channel) != "loading") {
+                    channelPageCacheLoading.set(req.params.channel, "loading")
+                    fetchAllMessages(channel).then(messages => {
+                        try { 
+                            channelPageCache.set(req.params.channel, messages)
+                            channelPageCacheLoading.set(req.params.channel, "done")
+                        } catch(e) {}
+                        
+                    });
+                }
+            }
+            let msgs = channelPageCache.get(req.params.channel)
             res.render('channel', { channel, msgs, marked, xss })
         } catch(e) {
             res.send(e.message)
@@ -125,3 +151,23 @@ client.on('guildDelete', async guild => {
 // pages.sineware.ca/GUILD_ID/CHANNEL_ID/MESSAGE_ID
 // rendered HTML and API
 client.login(process.env.TOKEN)
+
+async function fetchAllMessages(channel) {
+    let messages = [];
+  
+    // Create message pointer
+    let message = await channel.messages
+      .fetch({ limit: 1 })
+      .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages.push(message);
+  
+    while (message) {
+      let messagePage = await channel.messages.fetch({ limit: 100, before: message.id })
+      messagePage.forEach(msg => messages.push(msg));
+      // Update our message pointer to be last message in page of messages
+      message = 0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
+    }
+  
+    console.log(messages);  // Print all messages
+    return messages;
+}
