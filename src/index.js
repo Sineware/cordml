@@ -53,6 +53,29 @@ client.on('ready', async () => {
         }
     });
 
+    app.get('/sitemap.xml', async (req, res) => {
+        try {
+            const channels = await getChannels();
+            let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+            
+            // Add home page
+            sitemap += `  <url>\n    <loc>${process.env.BASE_URL}</loc>\n    <changefreq>daily</changefreq>\n  </url>\n`;
+            
+            // Add channel pages
+            for (const channel of channels) {
+                sitemap += `  <url>\n    <loc>${process.env.BASE_URL}/${channel.channel_snowflake}</loc>\n    <changefreq>hourly</changefreq>\n  </url>\n`;
+            }
+            
+            sitemap += '</urlset>';
+            
+            res.header('Content-Type', 'application/xml');
+            res.send(sitemap);
+        } catch(e) {
+            res.status(500).send(e.message);
+        }
+    });
+
     app.get('/:channel', async function (req, res) {
         try {
             const channels = await getChannelIds();
@@ -111,7 +134,7 @@ client.on('ready', async () => {
         } catch(e) {
             res.send(e.message)
         }
-    })
+    });
 
     app.get('/:channel/:msg', async function (req, res) {
         console.log(req.params.channel + "/" + req.params.msg)
@@ -129,12 +152,13 @@ client.on('ready', async () => {
         } catch(e) {
             res.send(e.message)
         }
-    })
+    });
 
     app.listen(3000, () => {
         console.log("Listening on port 3000");
     })
 })
+
 
 client.on('interactionCreate', async interaction => {
     if(interaction.type === InteractionType.ApplicationCommand) {

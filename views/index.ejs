@@ -1,38 +1,168 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Create websites from Discord channels and messages with Markdown support. Transform your Discord content into searchable, public web pages with Sineware CordML.">
+    <meta name="keywords" content="discord, website creator, markdown, channel pages, discord bot, Sineware, CordML">
+    <meta name="author" content="Sineware">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= process.env.BASE_URL %>">
+    <meta property="og:title" content="Sineware Discord Pages - Create Websites from Discord Channels">
+    <meta property="og:description" content="Transform your Discord channels into mini, searchable websites with Markdown support using Sineware CordML.">
+    <meta property="og:image" content="<%= process.env.BASE_URL %>/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= process.env.BASE_URL %>">
+    <meta property="twitter:title" content="Sineware Discord Pages - Create Websites from Discord Channels">
+    <meta property="twitter:description" content="Transform your Discord channels into mini, searchable websites with Markdown support using Sineware CordML.">
+    <meta property="twitter:image" content="<%= process.env.BASE_URL %>/logo.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= process.env.BASE_URL %>">
+
+    <!-- Title -->
     <title>Sineware Discord Pages - Make Websites from Discord Channels and Messages!</title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="/sakura.css" type="text/css">
     <link rel="stylesheet" href="/sakura-dark.css" media="screen and (prefers-color-scheme: dark)"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Sineware Discord Pages",
+        "description": "Create websites from Discord channels and messages with Markdown support",
+        "applicationCategory": "Website Generator",
+        "operatingSystem": "Web",
+        "provider": {
+            "@type": "Organization",
+            "name": "Sineware",
+            "url": "<%= process.env.BASE_URL %>"
+        }
+    }
+    </script>
+
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .feature-list {
+            margin: 20px 0;
+        }
+        .channel-list {
+            list-style: none;
+            padding: 0;
+        }
+        .channel-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #7289DA;
+            color: white !important; /* Force white text */
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid #7289DA;
+            font-weight: bold;
+        }
+
+        .cta-button:hover {
+            background-color: #5a6cbd;
+            border-color: #5a6cbd;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(114, 137, 218, 0.3);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(114, 137, 218, 0.2);
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h1 style="text-align: center;">Sineware Cloud Services <br />Discord Webpages</h1>
-    <p>Powered by Sineware CordML.</p>
-    <p><b>Create a mini website from Discord Channels and Messages! <br />
-        Every channel becomes a webpage with Markdown support.</b></p>
-    <a href="https://discord.com/api/oauth2/authorize?client_id=999532194173300736&permissions=67648&scope=bot">Bot
-        Invite Link</a>
-    <hr/>
-    <h3>Usage</h3>
-    <p>Add the bot to your server, then use "/createpage" to register a selected channel. You can use "/removepage" to
-        deregister a channel. Once a channel is added, it should appear below!</p>
-    <p>The topic of a channel will be the title for that channel page, and the first line of each message will be the
-        title for that section.</p>
-    <h3>Registered Channels (All Servers)</h3>
-    <p>(For search engine indexing purposes) - Note: Content is sourced from users Discord servers, Sineware is not
-        responsible for the content.</p>
-    <% for (let channel of c) { %>
-        <li><a href="/<%= channel.id %>"><%= channel.topic ?? "No Topic" %> (#<%= channel.name %>)</a> from
-            "<%= channel.guild.name %>"
-        </li>
-    <% } %>
-    <br />
-    <hr/>
-    <a href="https://www.contributor-covenant.org/version/2/1/code_of_conduct/">Content/Usage/Contribution Terms</a><br />
-    <a href="https://github.com/Sineware/cordml">Source</a>
-</div>
+    <main class="container">
+        <header>
+            <p style="font-size: 25px;">Sineware Cloud Services</p><hr />
+        </header>
+
+        <section class="introduction">
+            <h3>Create Websites from Discord Channels</h3>
+            <p><strong>Transform your Discord channels into mini websites with Markdown support!<br>
+            Every channel becomes a web searchable site with full formatting capabilities.</strong></p>
+            
+            <a href="https://discord.com/api/oauth2/authorize?client_id=999532194173300736&permissions=67648&scope=bot" 
+               class="cta-button" 
+               rel="noopener"
+               aria-label="Add Discord Bot to your server">
+                Add to Discord Server
+            </a>
+        </section>
+        <hr />
+        <section class="how-to-use">
+            <h3>Usage</h3>
+            <ul class="feature-list">
+                <li><strong>Add the bot to your Discord server</strong></li>
+                <li><strong>Use "/createpage" to register a channel</strong></li>
+                <li>Use "/removepage" to deregister a channel</li>
+                <li>Set your channel topic as the webpage title</li>
+                <li>First line of each message becomes a section title</li>
+            </ul>
+        </section>
+
+        <hr />
+
+        <section class="registered-channels">
+            <h3>Registered Channels</h3>
+            <p><em>Note: Content is sourced from users' Discord servers. Sineware is not responsible for user-generated content.</em></p>
+            
+            <ul class="channel-list">
+                <% for (let channel of c) { %>
+                <li class="channel-item">
+                    <a href="/<%= channel.id %>" 
+                       title="View <%= channel.topic || channel.name %> from <%= channel.guild.name %>">
+                        <%= channel.topic || "No Topic" %> (#<%= channel.name %>)
+                    </a>
+                    <span class="guild-name">from "<%= channel.guild.name %>"</span>
+                </li>
+                <% } %>
+            </ul>
+        </section>
+
+        <footer class="footer">
+            <nav>
+                <a href="https://www.contributor-covenant.org/version/2/1/code_of_conduct/" 
+                   rel="noopener noreferrer">Content/Usage/Contribution Terms</a>
+                |
+                <a href="https://github.com/Sineware/cordml" 
+                   rel="noopener noreferrer">Source Code</a>
+            </nav>
+            <p>&copy; <%= new Date().getFullYear() %> Sineware. All rights reserved.</p>
+        </footer>
+    </main>
 </body>
 </html>

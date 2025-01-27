@@ -1,12 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><%= channel.topic %> (#<%= channel.name %>)</title>
+    <meta name="description" content="<%= channel.topic || `Discord channel #${channel.name} from ${channel.guild.name}` %>">
+    <meta name="author" content="<%= channel.guild.name %>">
+    <meta name="keywords" content="discord, <%= channel.name %>, <%= channel.guild.name %>, community, messages">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= `${process.env.BASE_URL}/${channel.id}` %>">
+    <meta property="og:title" content="<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>">
+    <meta property="og:description" content="<%= channel.topic || `View messages from #${channel.name} in ${channel.guild.name}` %>">
+    <% if(channel.guild.iconURL()) { %>
+    <meta property="og:image" content="<%= channel.guild.iconURL() %>">
+    <% } %>
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= `${process.env.BASE_URL}/${channel.id}` %>">
+    <meta property="twitter:title" content="<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>">
+    <meta property="twitter:description" content="<%= channel.topic || `View messages from #${channel.name} in ${channel.guild.name}` %>">
+    <% if(channel.guild.iconURL()) { %>
+    <meta property="twitter:image" content="<%= channel.guild.iconURL() %>">
+    <% } %>
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= `${process.env.BASE_URL}/${channel.id}` %>">
+
+    <!-- Title -->
+    <title><%= channel.topic || `#${channel.name}` %> | <%= channel.guild.name %></title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="/sakura.css" type="text/css">
     <link rel="stylesheet" href="/sakura-dark.css" media="screen and (prefers-color-scheme: dark)"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+    <!-- Favicon -->
+    <% if(channel.guild.iconURL()) { %>
+    <link rel="icon" type="image/webp" href="<%= channel.guild.iconURL() %>">
+    <% } %>
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "DiscussionForumPosting",
+        "headline": "<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>",
+        "description": "<%= channel.topic || `Messages from #${channel.name} in ${channel.guild.name}` %>",
+        "publisher": {
+            "@type": "Organization",
+            "name": "<%= channel.guild.name %>"
+        },
+        "url": "<%= `${process.env.BASE_URL}/${channel.id}` %>",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "<%= `${process.env.BASE_URL}/${channel.id}` %>"
+        }
+    }
+    </script>
+
     <style>
         .pagination {
             display: flex;
@@ -22,64 +76,125 @@
             border-radius: 4px;
         }
         .pagination a.active {
-            background-color: darkcyan;
+            background-color: #4CAF50;
             color: white;
-            border: 1px solid darkcyan;
+            border: 1px solid #4CAF50;
         }
         .pagination a:hover:not(.active) {
             background-color: #ddd;
         }
+        .message-container {
+            border-style: solid;
+            margin: 10px;
+            padding: 10px;
+        }
+        .message-content {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .message-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* Improved accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="/"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</a>
-        <h1><%= channel.topic %></h1>
-        <p> (#<%= channel.name %> from "<%= channel.guild.name %>")</p>
-        <hr/>
-        
-        <% for (let msg of msgs) { %>
-            <div style="border-style: solid; margin: 10px; padding: 10px">
-                <a style="float: right;" href="/<%= channel.id %>/<%= msg.id %>">
-                    <i class="fa fa-chain" aria-hidden="true"></i>
-                </a>
-                <div><%- xss(marked.parse(msg.content ?? "")) %></div>
-                <% if(msg.attachments.first() !== undefined) { %>
-                    <div style="text-align: center;">
-                        <img src="<%= msg.attachments.first().url %>" 
-                             alt="<%= msg.attachments.first().filename %>"
-                             style="max-width: 95%;">
-                    </div>
-                <% } %>
-                <% if(msg.embeds[0]?.description !== undefined) { %>
-                    <h5><%- xss(marked.parse(msg.embeds[0].title ?? "")) %></h5>
-                    <code><%- xss(marked.parse(msg.embeds[0].description ?? "")) %></code>
-                <% } %>
-                <b><%- xss(msg.author.username ?? "") %> 
-                   (<%- new Date(msg.createdTimestamp).toLocaleString(); %>)</b>
-            </div>
-        <% } %>
+    <header>
+        <nav aria-label="Main navigation">
+            <a href="/" class="back-link">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                <span class="sr-only">Back to home</span>
+                Back
+            </a>
+        </nav>
+    </header>
 
-        <!-- Pagination -->
-        <div class="pagination">
-            <% if (pagination.current > 1) { %>
-                <a href="/<%= channel.id %>?page=1">First</a>
-                <a href="/<%= channel.id %>?page=<%= pagination.current - 1 %>">Previous</a>
-            <% } %>
-            
-            <% for(let i = Math.max(1, pagination.current - 2); 
-                    i <= Math.min(pagination.total, pagination.current + 2); i++) { %>
-                <a href="/<%= channel.id %>?page=<%= i %>" 
-                   class="<%= pagination.current === i ? 'active' : '' %>">
-                    <%= i %>
-                </a>
-            <% } %>
-            
-            <% if (pagination.current < pagination.total) { %>
-                <a href="/<%= channel.id %>?page=<%= pagination.current + 1 %>">Next</a>
-                <a href="/<%= channel.id %>?page=<%= pagination.total %>">Last</a>
-            <% } %>
-        </div>
-    </div>
+    <main>
+        <article>
+            <header>
+                <h1><%= channel.topic || `#${channel.name}` %></h1>
+                <p class="channel-info">(#<%= channel.name %> from "<%= channel.guild.name %>")</p>
+            </header>
+            <hr/>
+
+            <section class="messages" aria-label="Channel messages">
+                <% for (let msg of msgs) { %>
+                    <article class="message-container" id="message-<%= msg.id %>">
+                        <div class="message-header">
+                            <a class="permalink" href="/<%= channel.id %>/<%= msg.id %>" aria-label="Permalink to message">
+                                <i class="fa fa-chain" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="message-content">
+                            <%- xss(marked.parse(msg.content ?? "")) %>
+                        </div>
+
+                        <% if(msg.attachments.first() !== undefined) { %>
+                            <figure class="message-attachment">
+                                <img src="<%= msg.attachments.first().url %>" 
+                                     alt="<%= msg.attachments.first().filename %>"
+                                     loading="lazy"
+                                     style="max-width: 95%;">
+                                <figcaption><%= msg.attachments.first().filename %></figcaption>
+                            </figure>
+                        <% } %>
+
+                        <% if(msg.embeds[0]?.description !== undefined) { %>
+                            <div class="message-embed">
+                                <h5><%- xss(marked.parse(msg.embeds[0].title ?? "")) %></h5>
+                                <code><%- xss(marked.parse(msg.embeds[0].description ?? "")) %></code>
+                            </div>
+                        <% } %>
+
+                        <footer class="message-meta">
+                            <b><%- xss(msg.author.username ?? "") %></b>
+                            <time datetime="<%= new Date(msg.createdTimestamp).toISOString() %>">
+                                <%- new Date(msg.createdTimestamp).toLocaleString(); %>
+                            </time>
+                        </footer>
+                    </article>
+                <% } %>
+            </section>
+
+            <nav class="pagination" aria-label="Page navigation">
+                <% if (pagination.current > 1) { %>
+                    <a href="/<%= channel.id %>?page=1" aria-label="First page">First</a>
+                    <a href="/<%= channel.id %>?page=<%= pagination.current - 1 %>" aria-label="Previous page">Previous</a>
+                <% } %>
+                
+                <% for(let i = Math.max(1, pagination.current - 2); 
+                        i <= Math.min(pagination.total, pagination.current + 2); i++) { %>
+                    <a href="/<%= channel.id %>?page=<%= i %>" 
+                       class="<%= pagination.current === i ? 'active' : '' %>"
+                       aria-label="Page <%= i %>"
+                       <%= pagination.current === i ? 'aria-current="page"' : '' %>>
+                        <%= i %>
+                    </a>
+                <% } %>
+                
+                <% if (pagination.current < pagination.total) { %>
+                    <a href="/<%= channel.id %>?page=<%= pagination.current + 1 %>" aria-label="Next page">Next</a>
+                    <a href="/<%= channel.id %>?page=<%= pagination.total %>" aria-label="Last page">Last</a>
+                <% } %>
+            </nav>
+        </article>
+    </main>
+
+    <footer>
+        <hr />
+        <p>Powered by Sineware CordML</p>
+    </footer>
 </body>
 </html>
