@@ -11,6 +11,7 @@ console.log("Starting CordML Server...")
 let db;
 let channelPageCache = new Map();
 let channelPageCacheLoading = new Map();
+const MESSAGES_PER_PAGE = 5;
 
 const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
@@ -55,12 +56,15 @@ client.on('ready', async () => {
     app.get('/:channel', async function (req, res) {
         try {
             const channels = await getChannelIds();
-            console.log(req.params.channel)
+            const page = parseInt(req.query.page) || 1; // Get page from query parameter
+            
             if(!channels.includes(req.params.channel)) {
                 res.send("This channel is not supported.")
                 return
             }
+            
             let channel = await client.channels.fetch(req.params.channel)
+            
             if(!channelPageCache.has(req.params.channel)) {
                 if (channelPageCacheLoading.get(req.params.channel) == "loading") {
                     res.send("CordML is still updating this page, please wait a few seconds and refresh.");
@@ -73,20 +77,37 @@ client.on('ready', async () => {
                 channelPageCacheLoading.set(req.params.channel, "done")
                 return;
             } else {
-                // Update the cache in the background 
+                // Update the cache in the background
                 if(channelPageCacheLoading.get(req.params.channel) != "loading") {
                     channelPageCacheLoading.set(req.params.channel, "loading")
                     fetchAllMessages(channel).then(messages => {
-                        try { 
+                        try {
                             channelPageCache.set(req.params.channel, messages)
                             channelPageCacheLoading.set(req.params.channel, "done")
                         } catch(e) {}
-                        
                     });
                 }
             }
+            
             let msgs = channelPageCache.get(req.params.channel)
-            res.render('channel', { channel, msgs, marked, xss })
+            
+            // Calculate pagination
+            const totalMessages = msgs.length;
+            const totalPages = Math.ceil(totalMessages / MESSAGES_PER_PAGE);
+            const startIndex = (page - 1) * MESSAGES_PER_PAGE;
+            const endIndex = startIndex + MESSAGES_PER_PAGE;
+            const paginatedMsgs = msgs.slice(startIndex, endIndex);
+            
+            res.render('channel', { 
+                channel, 
+                msgs: paginatedMsgs, 
+                marked, 
+                xss,
+                pagination: {
+                    current: page,
+                    total: totalPages
+                }
+            })
         } catch(e) {
             res.send(e.message)
         }
@@ -168,6 +189,6 @@ async function fetchAllMessages(channel) {
       message = 0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
     }
   
-    console.log(messages);  // Print all messages
+    console.log("Fetched " + messages.length + " messages.");  // Print all messages
     return messages;
 }
