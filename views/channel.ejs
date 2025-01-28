@@ -4,7 +4,7 @@
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="<%= channel.topic || `Discord channel #${channel.name} from ${channel.guild.name}` %>">
+    <meta name="description" content="<%= `Discord channel #${channel.name} from ${channel.guild.name}` %>">
     <meta name="author" content="<%= channel.guild.name %>">
     <meta name="keywords" content="discord, <%= channel.name %>, <%= channel.guild.name %>, community, messages">
 
@@ -12,7 +12,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="<%= `${process.env.BASE_URL}/${channel.id}` %>">
     <meta property="og:title" content="<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>">
-    <meta property="og:description" content="<%= channel.topic || `View messages from #${channel.name} in ${channel.guild.name}` %>">
+    <meta property="og:description" content="<%= `From #${channel.name} in ${channel.guild.name}` %>">
     <% if(channel.guild.iconURL()) { %>
     <meta property="og:image" content="<%= channel.guild.iconURL() %>">
     <% } %>
@@ -21,7 +21,7 @@
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="<%= `${process.env.BASE_URL}/${channel.id}` %>">
     <meta property="twitter:title" content="<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>">
-    <meta property="twitter:description" content="<%= channel.topic || `View messages from #${channel.name} in ${channel.guild.name}` %>">
+    <meta property="twitter:description" content="<%= `From #${channel.name} in ${channel.guild.name}` %>">
     <% if(channel.guild.iconURL()) { %>
     <meta property="twitter:image" content="<%= channel.guild.iconURL() %>">
     <% } %>
@@ -48,7 +48,7 @@
         "@context": "https://schema.org",
         "@type": "DiscussionForumPosting",
         "headline": "<%= channel.topic || `#${channel.name} - ${channel.guild.name}` %>",
-        "description": "<%= channel.topic || `Messages from #${channel.name} in ${channel.guild.name}` %>",
+        "description": "<%= `From #${channel.name} in ${channel.guild.name}` %>",
         "publisher": {
             "@type": "Organization",
             "name": "<%= channel.guild.name %>"
